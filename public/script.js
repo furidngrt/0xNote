@@ -16,7 +16,7 @@ document.getElementById('saveButton').addEventListener('click', function() {
         alertDiv.innerText = 'Text area cannot be empty. Please enter some text.';
         alertContainer.appendChild(alertDiv);
     } else {
-        fetch('/save', {
+        fetch('/api/save', {  // Updated the endpoint to /api/save
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -36,7 +36,8 @@ document.getElementById('saveButton').addEventListener('click', function() {
 function saveToHistory(url) {
     let history = getCookie('history');
     history = history ? JSON.parse(history) : [];
-    history.push(url);
+    const timestamp = new Date().toLocaleString(); // Get the current date and time
+    history.push({ url: url, timestamp: timestamp });
     setCookie('history', JSON.stringify(history), 365);
 }
 
@@ -45,10 +46,13 @@ function displayHistory() {
     historyList.innerHTML = '';
     let history = getCookie('history');
     history = history ? JSON.parse(history) : [];
-    history.forEach(url => {
+    history.forEach(item => {
         const listItem = document.createElement('li');
         listItem.className = 'p-2 bg-gray-100 rounded shadow-md hover:bg-gray-200 transition';
-        listItem.innerHTML = `<a href="${url}" target="_blank" class="bg-blue-500 text-white hover:bg-blue-700 py-1 px-3 rounded">${url}</a>`;
+        listItem.innerHTML = `
+            <a href="${item.url}" target="_blank" class="bg-blue-500 text-white hover:bg-blue-700 py-1 px-3 rounded">${item.url}</a>
+            <span class="text-gray-500 ml-2">${item.timestamp}</span>
+        `;
         historyList.appendChild(listItem);
     });
 }
