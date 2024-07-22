@@ -36,7 +36,7 @@ app.post('/save', (req, res) => {
     }
 
     fs.writeFileSync(filePath, text);
-    res.json({ url: `http://localhost:${PORT}/view/${id}` });
+    res.json({ url: `https://0xnote.vercel.app/view/${id}` });
 });
 
 app.get('/view/:id', (req, res) => {
