@@ -1,0 +1,28 @@
+body {
+    background: #f8f9fa;
+}
+
+h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+textarea {
+    width: 100%;
+    font-size: 14px;
+    line-height: 1.5;
+    resize: none;
+}
+
+.btn-block {
+    width: 100%;
+}
+
+#linkContainer {
+    word-wrap: break-word;
+}
+
+footer {
+    background: #f8f9fa;
+    padding: 1rem 0;
+}
