@@ -17,7 +17,7 @@ const escapeHtml = (unsafe) => {
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
+        .replace(/"//g, '&quot;')
         .replace(/'/g, '&#039;');
 };
 
@@ -58,3 +58,38 @@ app.get('/view/:id', (req, res) => {
             <body class="bg-gray-100">
                 <div class="container mx-auto mt-10">
                     <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <pre class="whitespace-pre-wrap p-4 bg-gray-100 rounded-lg">${text}</pre>
+                    </div>
+                </div>
+            </body>
+            </html>
+        `);
+    } else {
+        res.status(404).send('Not found');
+    }
+});
+
+app.get('/raw/:id', (req, res) => {
+    const id = req.params.id;
+    const filePath = path.join(__dirname, `data/${id}.txt`);
+    if (fs.existsSync(filePath)) {
+        const text = fs.readFileSync(filePath, 'utf8');
+        res.send(text);
+    } else {
+        res.status(404).send('Not found');
+    }
+});
+
+// Route untuk halaman about
+app.get('/about', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'about.html'));
+});
+
+// Route untuk halaman contact
+app.get('/contact', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'contact.html'));
+});
+
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
