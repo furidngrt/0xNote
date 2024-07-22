@@ -15,7 +15,7 @@ const generateShortId = () => {
 const escapeHtml = (unsafe) => {
     return unsafe
         .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
+        .replace(/<//g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
@@ -25,7 +25,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.post('/save', (req, res) => {
+app.post('/api/save', (req, res) => {  // Updated endpoint to /api/save
     const text = req.body.text;
     const id = generateShortId();
     const filePath = path.join(__dirname, `data/${id}.txt`);
