@@ -1,9 +1,9 @@
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
-const fs = require('fs');
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
 // Fungsi untuk membuat ID acak pendek (5 karakter)
 const generateShortId = () => {
@@ -20,6 +20,9 @@ const escapeHtml = (unsafe) => {
         .replace(/'/g, '&#039;');
 };
 
+// Penyimpanan sementara dalam memori
+const tempStorage = {};
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -27,22 +30,17 @@ app.use(bodyParser.json());
 app.post('/api/save', (req, res) => {
     const text = req.body.text;
     const id = generateShortId();
-    const filePath = path.join(__dirname, `data/${id}.txt`);
 
-    // Pastikan folder data ada
-    if (!fs.existsSync(path.join(__dirname, 'data'))) {
-        fs.mkdirSync(path.join(__dirname, 'data'));
-    }
-
-    fs.writeFileSync(filePath, text);
+    // Simpan teks ke penyimpanan sementara
+    tempStorage[id] = text;
     res.json({ url: `https://0xnote.vercel.app/view/${id}` });
 });
 
 app.get('/view/:id', (req, res) => {
     const id = req.params.id;
-    const filePath = path.join(__dirname, `data/${id}.txt`);
-    if (fs.existsSync(filePath)) {
-        let text = fs.readFileSync(filePath, 'utf8');
+
+    if (tempStorage[id]) {
+        let text = tempStorage[id];
         text = escapeHtml(text);
         const title = `view ${id}.txt`; // Menampilkan judul dengan format "view {id}.txt"
         res.send(`
@@ -70,10 +68,9 @@ app.get('/view/:id', (req, res) => {
 
 app.get('/raw/:id', (req, res) => {
     const id = req.params.id;
-    const filePath = path.join(__dirname, `data/${id}.txt`);
-    if (fs.existsSync(filePath)) {
-        const text = fs.readFileSync(filePath, 'utf8');
-        res.send(text);
+
+    if (tempStorage[id]) {
+        res.send(tempStorage[id]);
     } else {
         res.status(404).send('Not found');
     }
