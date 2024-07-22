@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,27 +21,29 @@ const escapeHtml = (unsafe) => {
         .replace(/'/g, '&#039;');
 };
 
-// Penyimpanan sementara dalam memori
-const tempStorage = {};
-
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.post('/api/save', (req, res) => {
+app.post('/save', (req, res) => {
     const text = req.body.text;
     const id = generateShortId();
+    const filePath = path.join(__dirname, `data/${id}.txt`);
 
-    // Simpan teks ke penyimpanan sementara
-    tempStorage[id] = text;
-    res.json({ url: `https://0xnote.vercel.app/view/${id}` });
+    // Pastikan folder data ada
+    if (!fs.existsSync(path.join(__dirname, 'data'))) {
+        fs.mkdirSync(path.join(__dirname, 'data'));
+    }
+
+    fs.writeFileSync(filePath, text);
+    res.json({ url: `http://localhost:${PORT}/view/${id}` });
 });
 
 app.get('/view/:id', (req, res) => {
     const id = req.params.id;
-
-    if (tempStorage[id]) {
-        let text = tempStorage[id];
+    const filePath = path.join(__dirname, `data/${id}.txt`);
+    if (fs.existsSync(filePath)) {
+        let text = fs.readFileSync(filePath, 'utf8');
         text = escapeHtml(text);
         const title = `view ${id}.txt`; // Menampilkan judul dengan format "view {id}.txt"
         res.send(`
@@ -55,36 +58,3 @@ app.get('/view/:id', (req, res) => {
             <body class="bg-gray-100">
                 <div class="container mx-auto mt-10">
                     <div class="bg-white p-6 rounded-lg shadow-lg">
-                        <pre class="whitespace-pre-wrap p-4 bg-gray-100 rounded-lg">${text}</pre>
-                    </div>
-                </div>
-            </body>
-            </html>
-        `);
-    } else {
-        res.status(404).send('Not found');
-    }
-});
-
-app.get('/raw/:id', (req, res) => {
-    const id = req.params.id;
-
-    if (tempStorage[id]) {
-        res.send(tempStorage[id]);
-    } else {
-        res.status(404).send('Not found');
-    }
-});
-
-// Route untuk halaman about
-app.get('/about', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'about.html'));
-});
-
-// Route untuk halaman contact
-app.get('/contact', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'contact.html'));
-});
-
-// Ekspor aplikasi untuk Vercel
-module.exports = app;
