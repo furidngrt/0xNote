@@ -4,7 +4,6 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 // Fungsi untuk membuat ID acak pendek (5 karakter)
 const generateShortId = () => {
@@ -15,7 +14,7 @@ const generateShortId = () => {
 const escapeHtml = (unsafe) => {
     return unsafe
         .replace(/&/g, '&amp;')
-        .replace(/<//g, '&lt;')
+        .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
@@ -25,7 +24,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.post('/api/save', (req, res) => {  // Updated endpoint to /api/save
+app.post('/api/save', (req, res) => {
     const text = req.body.text;
     const id = generateShortId();
     const filePath = path.join(__dirname, `data/${id}.txt`);
@@ -90,6 +89,5 @@ app.get('/contact', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'contact.html'));
 });
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+// Ekspor aplikasi untuk Vercel
+module.exports = app;
